@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
-use std::{collections::HashMap, vec};
+
+use std::vec;
 
 use crate::model::{
     json_parse_config::ParseConfig, rust_field::RustField, rust_struct::RustStruct,
@@ -46,8 +47,7 @@ impl JsonParseUtil {
 
         if value.is_object() {
             self.parse_json_object(value.clone(), "Root".to_string(), &mut struct_list)
-        } else if value.is_array() {
-        }
+        } else if value.is_array() {}
 
         Ok(struct_list)
     }
@@ -78,6 +78,7 @@ impl JsonParseUtil {
         );
 
         let json_object = value.as_object().unwrap_or(&serde_json::Map::new()).clone();
+        println!("json_object: {:?}", json_object);
         for (key, value) in json_object {
             // 字符串
             if value.is_string() {
@@ -92,6 +93,34 @@ impl JsonParseUtil {
                 let rust_field = RustField::new(
                     key.clone(),
                     RustType::Bool,
+                    self.parse_config.public_struct,
+                    None,
+                );
+                rust_struct.fields.borrow_mut().push(rust_field);
+            } else if value.is_number() {
+                if value.is_i64() {
+                    let n = value.as_i64().unwrap_or(0);
+                    if (n as i32) as i64 == n {
+                        let rust_field = RustField::new(
+                            key.clone(),
+                            RustType::Integer32,
+                            self.parse_config.public_struct,
+                            None,
+                        );
+                        rust_struct.fields.borrow_mut().push(rust_field);
+                    } else {
+                        let rust_field = RustField::new(
+                            key.clone(),
+                            RustType::Integer64,
+                            self.parse_config.public_struct,
+                            None,
+                        );
+                        rust_struct.fields.borrow_mut().push(rust_field);
+                    }
+                }
+                let rust_field = RustField::new(
+                    key.clone(),
+                    RustType::Integer32,
                     self.parse_config.public_struct,
                     None,
                 );

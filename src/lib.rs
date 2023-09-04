@@ -46,9 +46,11 @@ mod tests {
         let parse_config = ParseConfig::with_params(true, true, true, true, true);
         let parse_util = JsonParseUtil::with_config(parse_config);
         let json = r#"{
-            "age": 1,
-            "sex": false
+            "name": "zhangsan",
+            "sex": false,
+            "age": 79769313486231570000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
         }"#;
+        // println!("{}", f64::MAX);
         let result = parse_util.parse_json(json.to_string());
         if let Ok(struct_list) = result {
             for ele in struct_list {
