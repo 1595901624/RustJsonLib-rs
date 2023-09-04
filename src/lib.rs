@@ -1,4 +1,4 @@
-mod json_parse;
+mod json_parse_util;
 mod model;
 mod util;
 
@@ -14,7 +14,6 @@ mod tests {
     use crate::model::rust_field::RustField;
     use crate::model::rust_struct::RustStruct;
     use crate::model::rust_type::RustType;
-    use super::*;
 
     #[test]
     fn it_works() {

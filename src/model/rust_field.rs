@@ -1,4 +1,4 @@
-use std::hash::{Hash, Hasher};
+use std::hash::Hash;
 use crate::model::rust_type::RustType;
 use serde::{Deserialize, Serialize};
 

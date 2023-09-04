@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use crate::model::constant::KEYWORDS;
 
 /// Judge whether the string is valid json
