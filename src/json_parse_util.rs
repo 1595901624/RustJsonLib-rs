@@ -1,6 +1,11 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
-use crate::model::{json_parse_config::ParseConfig, rust_struct::RustStruct};
+use std::{collections::HashMap, vec};
+
+use crate::model::{
+    json_parse_config::ParseConfig, rust_field::RustField, rust_struct::RustStruct,
+    rust_type::RustType,
+};
 
 pub struct JsonParseUtil {
     pub parse_config: ParseConfig,
@@ -24,7 +29,7 @@ impl JsonParseUtil {
     }
 
     pub fn parse_json(&self, json: String) -> Result<Vec<RustStruct>, Box<dyn std::error::Error>> {
-        let mut rust_struct_list: Vec<RustStruct> = vec![];
+        let mut struct_list: Vec<RustStruct> = vec![];
 
         // create a root struct
         let rust_struct = RustStruct::new(
@@ -40,19 +45,61 @@ impl JsonParseUtil {
         let value = serde_json::from_str::<serde_json::Value>(&json)?;
 
         if value.is_object() {
-            
+            self.parse_json_object(value.clone(), "Root".to_string(), &mut struct_list)
         } else if value.is_array() {
-
         }
 
-        Ok(rust_struct_list)
+        Ok(struct_list)
     }
 
-    fn parse_json_object(&self) {
+    fn parse_json_object(
+        &self,
+        value: serde_json::Value,
+        struct_name: String,
+        struct_list: &mut Vec<RustStruct>,
+    ) {
+        // let name = if struct_name.is_empty() {
+        //     "Root".to_string()
+        // } else {
+        //     struct_name.clone()
+        // }
+        let rust_struct = RustStruct::new(
+            if struct_name.is_empty() {
+                "Root".to_string()
+            } else {
+                struct_name.clone()
+            },
+            vec![],
+            self.parse_config.serde_derive,
+            self.parse_config.public_struct,
+            self.parse_config.option,
+            self.parse_config.debug_derive,
+            self.parse_config.clone_derive,
+        );
 
+        let json_object = value.as_object().unwrap_or(&serde_json::Map::new()).clone();
+        for (key, value) in json_object {
+            // 字符串
+            if value.is_string() {
+                let rust_field = RustField::new(
+                    key.clone(),
+                    RustType::Str,
+                    self.parse_config.public_struct,
+                    None,
+                );
+                rust_struct.fields.borrow_mut().push(rust_field);
+            } else if value.is_boolean() {
+                let rust_field = RustField::new(
+                    key.clone(),
+                    RustType::Bool,
+                    self.parse_config.public_struct,
+                    None,
+                );
+                rust_struct.fields.borrow_mut().push(rust_field);
+            }
+        }
+        struct_list.push(rust_struct);
     }
 
-    fn parse_json_array(&self) {
-
-    }
+    fn parse_json_array(&self) {}
 }
