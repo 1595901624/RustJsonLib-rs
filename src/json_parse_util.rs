@@ -3,10 +3,10 @@
 
 use std::vec;
 
-use crate::model::{
+use crate::{model::{
     json_parse_config::ParseConfig, rust_field::RustField, rust_struct::RustStruct,
     rust_type::RustType,
-};
+}, util};
 
 pub struct JsonParseUtil {
     pub parse_config: ParseConfig,
@@ -52,6 +52,11 @@ impl JsonParseUtil {
         Ok(struct_list)
     }
 
+    /// parse json object
+    /// @param value
+    /// @param struct_name
+    /// @param struct_list 
+    /// @return Vec<RustStruct>
     fn parse_json_object(
         &self,
         value: serde_json::Value,
@@ -100,6 +105,7 @@ impl JsonParseUtil {
             } else if value.is_number() {
                 if value.is_i64() {
                     let n = value.as_i64().unwrap_or(0);
+                    // i32
                     if (n as i32) as i64 == n {
                         let rust_field = RustField::new(
                             key.clone(),
@@ -109,6 +115,7 @@ impl JsonParseUtil {
                         );
                         rust_struct.fields.borrow_mut().push(rust_field);
                     } else {
+                        // i64
                         let rust_field = RustField::new(
                             key.clone(),
                             RustType::Integer64,
@@ -117,12 +124,43 @@ impl JsonParseUtil {
                         );
                         rust_struct.fields.borrow_mut().push(rust_field);
                     }
+                } else if value.is_f64() {
+                    // f64
+                    let rust_field = RustField::new(
+                        key.clone(),
+                        RustType::Float64,
+                        self.parse_config.public_struct,
+                        None,
+                    );
+                    rust_struct.fields.borrow_mut().push(rust_field);
+                } else {
+                    // default i32
+                    let rust_field = RustField::new(
+                        key.clone(),
+                        RustType::Integer32,
+                        self.parse_config.public_struct,
+                        None,
+                    );
+                    rust_struct.fields.borrow_mut().push(rust_field);
                 }
+            } else if value.is_object() {
                 let rust_field = RustField::new(
                     key.clone(),
-                    RustType::Integer32,
+                    RustType::Obj,
                     self.parse_config.public_struct,
-                    None,
+                    Some(util::capitalize_first_letter(&key))
+                );
+                rust_struct.fields.borrow_mut().push(rust_field);
+                self.parse_json_object(value, util::capitalize_first_letter(&key), struct_list);
+            } else if value.is_array() {
+
+            } else  {
+               // if value is null, as it is an empty string 
+                let rust_field = RustField::new(
+                    key.clone(),
+                    RustType::Str,
+                    self.parse_config.public_struct,
+                    None
                 );
                 rust_struct.fields.borrow_mut().push(rust_field);
             }
