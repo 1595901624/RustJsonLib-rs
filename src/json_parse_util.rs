@@ -46,28 +46,21 @@ impl JsonParseUtil {
         let value = serde_json::from_str::<serde_json::Value>(&json)?;
 
         if value.is_object() {
-            self.parse_json_object(value.clone(), "Root".to_string(), &mut struct_list)
-        } else if value.is_array() {}
+            self.parse_json_object(value.clone(), "Root".to_string(), &mut struct_list);
+        } else if value.is_array() {
+            self.parse_json_array("Root".to_string(), value.clone(), &rust_struct, &mut struct_list);
+        }
 
         Ok(struct_list)
     }
 
     /// parse json object
-    /// @param value
-    /// @param struct_name
-    /// @param struct_list 
-    /// @return Vec<RustStruct>
     fn parse_json_object(
         &self,
         value: serde_json::Value,
         struct_name: String,
         struct_list: &mut Vec<RustStruct>,
     ) {
-        // let name = if struct_name.is_empty() {
-        //     "Root".to_string()
-        // } else {
-        //     struct_name.clone()
-        // }
         let rust_struct = RustStruct::new(
             if struct_name.is_empty() {
                 "Root".to_string()
@@ -148,19 +141,19 @@ impl JsonParseUtil {
                     key.clone(),
                     RustType::Obj,
                     self.parse_config.public_struct,
-                    Some(util::capitalize_first_letter(&key))
+                    Some(util::capitalize_first_letter(&key)),
                 );
                 rust_struct.fields.borrow_mut().push(rust_field);
                 self.parse_json_object(value, util::capitalize_first_letter(&key), struct_list);
             } else if value.is_array() {
-
-            } else  {
-               // if value is null, as it is an empty string 
+                self.parse_json_array(key.clone(), value, &rust_struct, struct_list);
+            } else {
+                // if value is null, as it is an empty string
                 let rust_field = RustField::new(
                     key.clone(),
                     RustType::Str,
                     self.parse_config.public_struct,
-                    None
+                    None,
                 );
                 rust_struct.fields.borrow_mut().push(rust_field);
             }
@@ -168,5 +161,52 @@ impl JsonParseUtil {
         struct_list.push(rust_struct);
     }
 
-    fn parse_json_array(&self) {}
+    /// parse json array
+    fn parse_json_array(&self,
+                        filed_name: String,
+                        value: serde_json::Value,
+                        rust_struct: &RustStruct,
+                        struct_list: &mut Vec<RustStruct>) {
+        let json_array = value.as_array().unwrap_or(&Vec::new()).clone();
+        if json_array.is_empty() {
+            // if array is empty
+            let rust_field = RustField::new(
+                filed_name.clone(),
+                RustType::Vec,
+                self.parse_config.public_struct,
+                Some("String".to_string()),
+            );
+            rust_struct.fields.borrow_mut().push(rust_field);
+        } else {
+            // if array is not empty
+            let first_field = json_array[0].clone();
+            if first_field.is_string() {
+                // if first element is a string
+            } else if first_field.is_number() {
+                // if first element is a number
+            } else if first_field.is_boolean() {
+                // if first element is a boolean
+                let rust_field = RustField::new(
+                    filed_name.clone(),
+                    RustType::Vec,
+                    self.parse_config.public_struct,
+                    Some("bool".to_string()),
+                );
+                rust_struct.fields.borrow_mut().push(rust_field);
+            } else if first_field.is_object() {
+                // if first element is an object
+                let rust_field = RustField::new(
+                    filed_name.clone(),
+                    RustType::Vec,
+                    self.parse_config.public_struct,
+                    Some(util::capitalize_first_letter(&filed_name)),
+                );
+                rust_struct.fields.borrow_mut().push(rust_field);
+                // todo buildNewJsonObjectByJsonArray
+                // self.parse_json_object();
+            } else if first_field.is_array() {
+                // if first element is an array
+            }
+        }
+    }
 }

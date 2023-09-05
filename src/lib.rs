@@ -69,6 +69,7 @@ mod tests {
             "city": {
                 "country": "beijing"
             },
+            "weather": [false,true,false],
             "age": 1
         }"#;
         // println!("{}", f64::MAX);
