@@ -157,29 +157,29 @@ impl RustStruct {
     }
 }
 
-pub fn process_field_name(cur_struct: RustStruct, field: RustField) -> String {
-    let mut temp_name = camel_to_snake(&field.fixed_name);
+// pub fn process_field_name(cur_struct: RustStruct, field: RustField) -> String {
+//     let mut temp_name = camel_to_snake(&field.fixed_name);
 
-    // if name is rust keyword, add "struct name" as prefix
-    if is_default_rust_keyword(&temp_name) {
-        temp_name = format!("{}_{}", camel_to_snake(cur_struct.name.as_str()), temp_name);
-    }
+//     // if name is rust keyword, add "struct name" as prefix
+//     if is_default_rust_keyword(&temp_name) {
+//         temp_name = format!("{}_{}", camel_to_snake(cur_struct.name.as_str()), temp_name);
+//     }
 
-    if is_numeric(temp_name.as_str()) {
-        temp_name = format!("{}_{}", camel_to_snake(cur_struct.name.as_str()), temp_name);
-    }
+//     if is_numeric(temp_name.as_str()) {
+//         temp_name = format!("{}_{}", camel_to_snake(cur_struct.name.as_str()), temp_name);
+//     }
 
-    // if name is duplicate, add "struct name" as prefix until not duplicate
-    while cur_struct
-        .fields
-        .borrow_mut()
-        .iter()
-        .filter(|&f| f.fixed_name == temp_name && *f != field)
-        .count()
-        > 0
-    {
-        temp_name = format!("{}_{}", camel_to_snake(cur_struct.name.as_str()), temp_name);
-    }
+//     // if name is duplicate, add "struct name" as prefix until not duplicate
+//     while cur_struct
+//         .fields
+//         .borrow_mut()
+//         .iter()
+//         .filter(|&f| f.fixed_name == temp_name && *f != field)
+//         .count()
+//         > 0
+//     {
+//         temp_name = format!("{}_{}", camel_to_snake(cur_struct.name.as_str()), temp_name);
+//     }
 
-    temp_name
-}
+//     temp_name
+// }

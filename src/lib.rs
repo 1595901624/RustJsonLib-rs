@@ -2,11 +2,29 @@ mod json_parse_util;
 mod model;
 mod util;
 
+use json_parse_util::JsonParseUtil;
+use model::json_parse_config::ParseConfig;
 pub use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
 pub fn sum(a: i32, b: i32) -> i32 {
     return a + b;
+}
+
+#[wasm_bindgen]
+pub fn parse_json_default(json: &str) -> String {
+    let parse_config = ParseConfig::with_params(true, true, true, true, true);
+    let parse_util = JsonParseUtil::with_config(parse_config);
+    let result = parse_util.parse_json(json.to_string());
+    if let Ok(struct_list) = result {
+        let mut struct_string = String::new();
+        for ele in struct_list {
+            //println!("{}", ele.to_rust_struct_string());
+            struct_string.push_str(&ele.to_rust_struct_string());
+        }
+        return struct_string;
+    }
+    return "".to_string();
 }
 
 #[cfg(test)]
