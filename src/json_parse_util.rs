@@ -182,8 +182,54 @@ impl JsonParseUtil {
             let first_field = json_array[0].clone();
             if first_field.is_string() {
                 // if first element is a string
+                let rust_field = RustField::new(
+                  filed_name.clone(),
+                  RustType::Vec,
+                  self.parse_config.public_struct,
+                  Some("String".to_string()),  
+                );
             } else if first_field.is_number() {
                 // if first element is a number
+                if first_field.is_i64() {
+                    let n = first_field.as_i64().unwrap_or(0);
+                    // i32
+                    if (n as i32) as i64 == n {
+                        let rust_field = RustField::new(
+                            filed_name.clone(),
+                            RustType::Vec,
+                            self.parse_config.public_struct,
+                            Some("i32".to_string()),
+                        );
+                        rust_struct.fields.borrow_mut().push(rust_field);
+                    } else {
+                        // i64
+                        let rust_field = RustField::new(
+                            filed_name.clone(),
+                            RustType::Vec,
+                            self.parse_config.public_struct,
+                            Some("i64".to_string()),
+                        );
+                        rust_struct.fields.borrow_mut().push(rust_field);
+                    }
+                } else if first_field.is_f64() {
+                    // f64
+                    let rust_field = RustField::new(
+                        filed_name.clone(),
+                        RustType::Vec,
+                        self.parse_config.public_struct,
+                        Some("i32".to_string()),
+                    );
+                    rust_struct.fields.borrow_mut().push(rust_field);
+                } else {
+                    // default i32
+                    let rust_field = RustField::new(
+                        filed_name.clone(),
+                        RustType::Integer32,
+                        self.parse_config.public_struct,
+                        None,
+                    );
+                    rust_struct.fields.borrow_mut().push(rust_field);
+                }
             } else if first_field.is_boolean() {
                 // if first element is a boolean
                 let rust_field = RustField::new(
@@ -208,5 +254,12 @@ impl JsonParseUtil {
                 // if first element is an array
             }
         }
+    }
+
+    /// build new json object by json array
+    /// [value] a json array
+    fn build_new_json_object_by_json_array(value: serde_json::Value) -> serde_json::Value {
+
+        return serde_json::Value::Null;
     }
 }
