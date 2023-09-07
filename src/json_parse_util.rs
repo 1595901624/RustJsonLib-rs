@@ -183,10 +183,10 @@ impl JsonParseUtil {
             if first_field.is_string() {
                 // if first element is a string
                 let rust_field = RustField::new(
-                  filed_name.clone(),
-                  RustType::Vec,
-                  self.parse_config.public_struct,
-                  Some("String".to_string()),  
+                    filed_name.clone(),
+                    RustType::Vec,
+                    self.parse_config.public_struct,
+                    Some("String".to_string()),
                 );
             } else if first_field.is_number() {
                 // if first element is a number
@@ -249,7 +249,11 @@ impl JsonParseUtil {
                 );
                 rust_struct.fields.borrow_mut().push(rust_field);
                 // todo buildNewJsonObjectByJsonArray
-                // self.parse_json_object();
+                self.parse_json_object(
+                    self.build_new_json_object_by_json_array(value),
+                    util::capitalize_first_letter(&filed_name),
+                    struct_list,
+                );
             } else if first_field.is_array() {
                 // if first element is an array
             }
@@ -258,8 +262,21 @@ impl JsonParseUtil {
 
     /// build new json object by json array
     /// [value] a json array
-    fn build_new_json_object_by_json_array(value: serde_json::Value) -> serde_json::Value {
-
-        return serde_json::Value::Null;
+    fn build_new_json_object_by_json_array(&self, value: serde_json::Value) -> serde_json::Value {
+        let mut map = serde_json::Map::new();
+        let json_array = value.as_array().unwrap_or(&Vec::new()).clone();
+        for json_element in json_array {
+            let json_object = json_element.as_object().unwrap_or(&serde_json::Map::new()).clone();
+            for (key, value) in json_object {
+                if !map.contains_key(&key) {
+                    map.insert(key.clone(), value.clone());
+                } else {
+                    if map.get(&key).unwrap_or(&serde_json::Value::Null).is_null() && !value.is_null() {
+                        map.insert(key.clone(), value.clone());
+                    }
+                }
+            }
+        }
+        return serde_json::Value::Object(map);
     }
 }
