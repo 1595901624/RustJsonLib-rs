@@ -27,6 +27,29 @@ pub fn parse_json_default(json: &str) -> String {
     return "".to_string();
 }
 
+///
+/// parse json by parse config
+///
+/// # Parameters
+/// - json: json string
+/// - params_js_value: params
+///
+pub fn parse_json(json: &str, params_js_value: JsValue) -> String {
+    if let Ok(parse_config) = serde_wasm_bindgen::from_value::<ParseConfig>(params_js_value) {
+        let parse_util = JsonParseUtil::with_config(parse_config);
+        let result = parse_util.parse_json(json.to_string());
+        if let Ok(struct_list) = result {
+            let mut struct_string = String::new();
+            for ele in struct_list {
+                //println!("{}", ele.to_rust_struct_string());
+                struct_string.push_str(&ele.to_rust_struct_string());
+            }
+            return struct_string;
+        }
+    }
+    return "".to_string();
+}
+
 #[cfg(test)]
 mod tests {
     use crate::json_parse_util::JsonParseUtil;
