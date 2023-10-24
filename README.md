@@ -1,2 +1,8 @@
 # RustJsonLib-rs
-rust wsm library
+rust wasm library
+
+RustJson-vscode
+
+## Build
+
+wasm-pack build --target nodejs
