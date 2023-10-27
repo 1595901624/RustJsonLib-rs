@@ -34,6 +34,7 @@ pub fn parse_json_default(json: &str) -> String {
 /// - json: json string
 /// - params_js_value: params
 ///
+#[wasm_bindgen]
 pub fn parse_json(json: &str, params_js_value: JsValue) -> String {
     if let Ok(parse_config) = serde_wasm_bindgen::from_value::<ParseConfig>(params_js_value) {
         let parse_util = JsonParseUtil::with_config(parse_config);
