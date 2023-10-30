@@ -188,6 +188,7 @@ impl JsonParseUtil {
                     self.parse_config.public_struct,
                     Some("String".to_string()),
                 );
+                rust_struct.fields.borrow_mut().push(rust_field);
             } else if first_field.is_number() {
                 // if first element is a number
                 if first_field.is_i64() {
